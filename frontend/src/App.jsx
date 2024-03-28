@@ -17,6 +17,23 @@ function App() {
   const [predictions, setPredictions] = useState([]);
   const [probabilities, setProbabilities] = useState([0, 0, 0, 0, 0]);
 
+  const onDragOver = (event) => {
+    event.preventDefault();
+  };
+
+  const onDrop = (event) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files;
+    if (file.length > 0) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+        setImage(file[0]);
+      };
+      reader.readAsDataURL(file[0]);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (image) {
@@ -66,8 +83,9 @@ function App() {
         }}>
           <Typography variant="h4" textAlign='center' color='white'>Image Classifer</Typography>
           <Typography variant="h5" textAlign='center' color='white'>Let me guess what your image is!</Typography>
+          <Typography variant="h6" textAlign='center' color='white'>Click the box or drag and drop to upload an image</Typography>
           <form onSubmit={handleSubmit}>
-          <Box sx={{position: 'relative', marginTop: 5, alignItems: 'center'}}>
+          <Box sx={{position: 'relative', marginTop: 5, alignItems: 'center'}} onDragOver={onDragOver} onDrop={onDrop}>
               <label style={{width: '100%', height: '100%', position: 'absolute'}}>
                 <input 
                   type="file"
@@ -110,9 +128,9 @@ function App() {
           </form>
         </Box>
         <Box>
-          <Typography variant='h4' color='white' alignContent='center'>
+          {(predictions.length > 0) && <Typography variant='h4' color='white' alignContent='center'>
             I see...
-          </Typography>
+          </Typography>}
           <Box sx={{display: 'flex', flexDirection: 'column', gap: 1, width: '500px'}}>
             {(predictions && probabilities) ? predictions.map((prediction, index) => (
               <Box key={index} sx={{
