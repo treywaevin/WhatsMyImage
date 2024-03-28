@@ -15,6 +15,7 @@ function App() {
   const [preview, setPreview] = useState(null);
   const [image, setImage] = useState(null);
   const [predictions, setPredictions] = useState([]);
+  const [probabilities, setProbabilities] = useState([0, 0, 0, 0, 0]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,7 +28,7 @@ function App() {
       })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.probabilities);
+        setProbabilities(data.probabilities);
         setPredictions(data.predictions);
       })
       .catch((error) => {
@@ -87,8 +88,8 @@ function App() {
                 sx={{
                   minWidth: {xs: '300px', md: '400px'},
                   minHeight: {xs: '300px', md: '400px'},
-                  maxWidth: '800px',
-                  maxHeight: '800px',
+                  maxWidth: '500px',
+                  maxHeight: '500px',
                   border: '5px solid #fb8500',
                 }}
               />
@@ -112,26 +113,38 @@ function App() {
           <Typography variant='h4' color='white' alignContent='center'>
             I see...
           </Typography>
-          <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
-            <Box>
-              <Typography variant='h6' color='white'>
-                {predictions ? predictions[0] : 'Loading...'} 
-              </Typography>
-              <LinearProgress variant='determinate' value={50} color='primary'/>
-            </Box>
-            <Typography variant='h6' color='white'>
-              {predictions ? predictions[1] : 'Loading...'} 
-            </Typography>
-            <Typography variant='h6' color='white'>
-              {predictions ? predictions[2] : 'Loading...'} 
-            </Typography>
-            <Typography variant='h6' color='white'>
-              {predictions ? predictions[3] : 'Loading...'} 
-            </Typography>
-            <Typography variant='h6' color='white'>
-              {predictions ? predictions[4] : 'Loading...'}
-            </Typography>
-          </Box>
+          <Box sx={{display: 'flex', flexDirection: 'column', gap: 1, width: '500px'}}>
+            {(predictions && probabilities) ? predictions.map((prediction, index) => (
+              <Box key={index} sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+                <Typography variant='h6' color='white' sx={{flexGrow: 1}}>
+                  {prediction} 
+                </Typography>
+                <Typography variant='h6' color='white' sx={{marginLeft: 1}}>
+                  {Math.round(probabilities[index] * 100)}%
+                </Typography>
+                <LinearProgress variant='determinate' value={probabilities[index] * 100}
+                  sx={{width: '300px', marginLeft: 2, color: '#fb8500'}}
+                />
+              </Box>
+            )) : (
+              Array(5).fill().map((_, index) => (
+                <Box key={index} sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                  <Typography variant='h6' color='white'>
+                    Loading...
+                  </Typography>
+                  <LinearProgress variant='determinate' value={0} sx={{width: '300px',marginLeft: 2, color: '#fb8500'}}/>
+                </Box>
+              ))
+            )}
+          </Box> 
         </Box>
       </Box>
     </ThemeProvider>
